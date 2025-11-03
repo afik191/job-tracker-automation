@@ -2,9 +2,11 @@ name: Job Automation Bots
 
 on:
   schedule:
-    # Run the email bot at 7:00 AM (UTC) every 2 days
+     # Run the email bot at 7:00 AM (UTC) every 2 days
+     # This is 9:00 AM in Israel (IST, UTC+2)
     - cron: '0 7 */2 * *'
-    # Run the job checker at 7:00 AM (UTC) every Sunday
+     # Run the job checker at 7:00 AM (UTC) every Sunday
+     # This is 9:00 AM in Israel (IST, UTC+2)
     - cron: '0 7 * * 0'
   # This line lets you run it manually from the "Actions" tab
   workflow_dispatch:
