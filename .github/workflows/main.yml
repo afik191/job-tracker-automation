@@ -1,0 +1,72 @@
+name: Job Automation Bots
+
+on:
+  schedule:
+    # Run the email bot at 7:00 AM (UTC) every 2 days
+    - cron: '0 7 */2 * *'
+    # Run the job checker at 7:00 AM (UTC) every Sunday
+    - cron: '0 7 * * 0'
+  # This line lets you run it manually from the "Actions" tab
+  workflow_dispatch:
+
+jobs:
+  run-email-bot:
+    # Only run this job for the 2-day cron or manual trigger
+    if: github.event.schedule == '0 7 */2 * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Match your Node.js version
+
+      # Create the secret files from GitHub Secrets
+      - name: Create Google Credentials File
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS_JSON }}" > ./credentials.json
+      - name: Create Google Token File
+        run: echo "${{ secrets.GOOGLE_TOKEN_JSON }}" > ./token.json
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Email Bot
+        run: node index.js
+        env:
+          # Pass all other secrets as environment variables
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          TRELLO_SENT_CV_LIST_ID: ${{ secrets.TRELLO_SENT_CV_LIST_ID }}
+          TRELLO_ESTABLISHED_CONTACT_LIST_ID: ${{ secrets.TRELLO_ESTABLISHED_CONTACT_LIST_ID }}
+          TRELLO_INITIAL_INTERVIEW_LIST_ID: ${{ secrets.TRELLO_INITIAL_INTERVIEW_LIST_ID }}
+          TRELLO_CODING_INTERVIEW_LIST_ID: ${{ secrets.TRELLO_CODING_INTERVIEW_LIST_ID }}
+          TRELLO_ARCHITECTURE_INTERVIEW_LIST_ID: ${{ secrets.TRELLO_ARCHITECTURE_INTERVIEW_LIST_ID }}
+          TRELLO_MANAGEMENT_AND_HR_LIST_ID: ${{ secrets.TRELLO_MANAGEMENT_AND_HR_LIST_ID }}
+          TRELLO_DROPPED_INITIAL_LIST_ID: ${{ secrets.TRELLO_DROPPED_INITIAL_LIST_ID }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+
+  run-job-checker:
+    # Only run this job for the weekly cron or manual trigger
+    if: github.event.schedule == '0 7 * * 0' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Job Checker
+        run: node checkJobs.js
+        env:
+          # Job checker only needs these secrets
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          TRELLO_SENT_CV_LIST_ID: ${{ secrets.TRELLO_SENT_CV_LIST_ID }}
+          TRELLO_JOB_DELETED_FROM_WEBSITE_LIST_ID: ${{ secrets.TRELLO_JOB_DELETED_FROM_WEBSITE_LIST_ID }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+
