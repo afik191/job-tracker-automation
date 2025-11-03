@@ -1,4 +1,5 @@
 #custom 
+upload-env-to-github.sh
 token.json
 credentials.json
 # Logs
