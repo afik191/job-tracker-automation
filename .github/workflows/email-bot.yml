@@ -16,9 +16,10 @@ jobs:
 
       # Create the secret files from GitHub Secrets
       - name: Create Google Credentials File
-        run: echo "${{ secrets.GOOGLE_CREDENTIALS_JSON }}" > ./credentials.json
+        # Using printf is safer for multi-line JSON
+        run: printf "%s\n" "${{ secrets.GOOGLE_CREDENTIALS_JSON }}" > ./credentials.json
       - name: Create Google Token File
-        run: echo "${{ secrets.GOOGLE_TOKEN_JSON }}" > ./token.json
+        run: printf "%s\n" "${{ secrets.GOOGLE_TOKEN_JSON }}" > ./token.json
 
       - name: Install Dependencies
         run: npm install
@@ -39,7 +40,3 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           USER_EMAIL: ${{ secrets.USER_EMAIL }}
-
-
-
-    
